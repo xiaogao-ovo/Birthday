@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <title>生日快乐 董希瑞！</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      height: 100%;
+      font-family: "微软雅黑", sans-serif;
+      background: linear-gradient(45deg, #ff9a9e, #fad0c4, #fbc2eb, #a6c1ee);
+      background-size: 600% 600%;
+      animation: bgChange 15s ease infinite;
+    }
+
+    @keyframes bgChange {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+
+    .card {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: rgba(255, 255, 255, 0.9);
+      padding: 40px;
+      border-radius: 20px;
+      text-align: center;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      z-index: 2;
+    }
+
+    h1 {
+      font-size: 48px;
+      color: #ff4081;
+      animation: pop 1s ease-in-out infinite alternate;
+    }
+
+    @keyframes pop {
+      from { transform: scale(1); }
+      to { transform: scale(1.05); }
+    }
+
+    .cake {
+      font-size: 100px;
+      margin: 20px 0;
+      animation: wiggle 1.5s infinite;
+    }
+
+    @keyframes wiggle {
+      0%, 100% { transform: rotate(0deg); }
+      25% { transform: rotate(5deg); }
+      75% { transform: rotate(-5deg); }
+    }
+
+    p {
+      font-size: 20px;
+      color: #333;
+      margin: 10px 0;
+    }
+
+    .signature {
+      margin-top: 30px;
+      font-style: italic;
+      font-size: 18px;
+    }
+
+    /* 气球动画 */
+    .balloon {
+      position: absolute;
+      bottom: -100px;
+      width: 30px;
+      height: 40px;
+      background-color: red;
+      border-radius: 50%;
+      animation: rise 6s infinite ease-in;
+      z-index: 1;
+    }
+
+    @keyframes rise {
+      0% { transform: translateY(0); opacity: 1; }
+      100% { transform: translateY(-120vh); opacity: 0; }
+    }
+
+    .balloon:nth-child(1) { left: 10%; background: #f48fb1; animation-delay: 0s; }
+    .balloon:nth-child(2) { left: 25%; background: #81d4fa; animation-delay: 1s; }
+    .balloon:nth-child(3) { left: 40%; background: #ffd54f; animation-delay: 2s; }
+    .balloon:nth-child(4) { left: 60%; background: #aed581; animation-delay: 3s; }
+    .balloon:nth-child(5) { left: 80%; background: #ce93d8; animation-delay: 4s; }
+
+    /* 烟花样式 */
+    canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 0;
+    }
+  </style>
+</head>
+<body>
+  <!-- 气球 -->
+  <div class="balloon"></div>
+  <div class="balloon"></div>
+  <div class="balloon"></div>
+  <div class="balloon"></div>
+  <div class="balloon"></div>
+
+  <!-- 生日卡片 -->
+  <div class="card">
+    <h1>🎉 生日快乐，董希瑞！🎉</h1>
+    <div class="cake">🎂</div>
+    <p>祝你在新的一岁里，</p>
+    <p>每天都拥有满满的快乐与希望，</p>
+    <p>愿你永远热爱生活，梦想闪闪发光！</p>
+    <div class="signature">—— 高梓烜</div>
+  </div>
+
+  <!-- 烟花 canvas -->
+  <canvas id="fireworks"></canvas>
+
+  <!-- 烟花特效 JS -->
+  <script>
+    const canvas = document.getElementById('fireworks');
+    const ctx = canvas.getContext('2d');
+    let W = window.innerWidth;
+    let H = window.innerHeight;
+    canvas.width = W;
+    canvas.height = H;
+
+    const particles = [];
+
+    function randomColor() {
+      return `hsl(${Math.floor(Math.random() * 360)}, 100%, 60%)`;
+    }
+
+    function createFirework(x, y) {
+      const count = 50 + Math.random() * 50;
+      for (let i = 0; i < count; i++) {
+        particles.push({
+          x: x,
+          y: y,
+          radius: 2 + Math.random() * 2,
+          color: randomColor(),
+          angle: Math.random() * 2 * Math.PI,
+          speed: Math.random() * 5 + 2,
+          alpha: 1,
+          decay: 0.01 + Math.random() * 0.02
+        });
+      }
+    }
+
+    function animate() {
+      ctx.fillStyle = "rgba(0,0,0,0.1)";
+      ctx.fillRect(0, 0, W, H);
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.x += Math.cos(p.angle) * p.speed;
+        p.y += Math.sin(p.angle) * p.speed;
+        p.alpha -= p.decay;
+
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2, false);
+        ctx.fillStyle = `rgba(${hexToRgb(p.color)}, ${p.alpha})`;
+        ctx.fill();
+        if (p.alpha <= 0) particles.splice(i, 1);
+      }
+      requestAnimationFrame(animate);
+    }
+
+    function hexToRgb(hslColor) {
+      const tmp = document.createElement('div');
+      tmp.style.color = hslColor;
+      document.body.appendChild(tmp);
+      const cs = window.getComputedStyle(tmp).color;
+      document.body.removeChild(tmp);
+      return cs.match(/\d+, \d+, \d+/)[0];
+    }
+
+    setInterval(() => {
+      createFirework(Math.random() * W, Math.random() * H / 2);
+    }, 800);
+
+    animate();
+    window.addEventListener('resize', () => {
+      W = window.innerWidth;
+      H = window.innerHeight;
+      canvas.width = W;
+      canvas.height = H;
+    });
+  </script>
+
+  <!-- 可选背景音乐 -->
+  <!--
+  <audio autoplay loop>
+    <source src="happy_birthday.mp3" type="audio/mpeg">
+    您的浏览器不支持音频播放。
+  </audio>
+  -->
+</body>
+</html>
